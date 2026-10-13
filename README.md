@@ -57,6 +57,8 @@ python app.py
 
 Open <http://127.0.0.1:5000>. The app loads the trained `best_model.pkl` when it exists; before retraining it remains compatible with the original `models/model.pkl` and `models/vectorizer.pkl`.
 
+For Render, install dependencies with `pip install -r requirements.txt` and start the service with `gunicorn --bind 0.0.0.0:$PORT app:app`.
+
 Optional environment settings:
 
 - `SECRET_KEY` — stable secret for signed browser sessions; a random per-process value is used if unset
