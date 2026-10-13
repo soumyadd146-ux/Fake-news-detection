@@ -16,9 +16,7 @@
             MACHINE LEARNING BASED CLASSIFICATION
         </span>
 
-        <h2>
-            Fake News <span>Detection</span>
-        </h2>
+        <h2>Fake News <span>Detection</span></h2>
 
         <p>
             Analyze news articles using Machine Learning and
@@ -48,7 +46,7 @@
             <h3>News Article Analysis</h3>
 
             <p>
-                Enter the news content you want to analyze.
+                Enter a headline, article body, or both. Maximum {{ max_input_characters }} characters.
             </p>
         </div>
 
@@ -71,33 +69,44 @@
           method="POST"
           id="newsForm">
 
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <label for="title" class="input-label">
+            Headline <span class="optional-label">Optional</span>
+        </label>
+        <input
+            id="title"
+            name="title"
+            class="news-title-input"
+            type="text"
+            maxlength="1000"
+            value="{{ title|default('', true) }}"
+            placeholder="Paste or type the article headline"
+        >
+
         <label for="news" class="input-label">
-            News Content
+            Article body <span class="optional-label">Optional</span>
         </label>
 
         <textarea
             id="news"
             name="news"
             class="news-textarea"
-            placeholder="Paste your news article here...
-
-For example:
-Enter the complete news article, including its headline if available, for analysis."
-            required
-        ></textarea>
-
+            maxlength="{{ max_input_characters }}"
+            placeholder="Paste the news article here..."
+        >{{ news|default('', true) }}</textarea>
 
         <div class="input-footer">
 
-            <span>
+            <span id="characterCount" aria-live="polite">
                 <i class="bi bi-info-circle"></i>
-                Enter the article text for analysis
+                0 / {{ max_input_characters }} characters
             </span>
 
             <button
                 type="button"
                 class="clear-btn"
-                onclick="document.getElementById('news').value='';"
+                id="clearNews"
             >
                 <i class="bi bi-x-circle"></i>
                 Clear Text
@@ -118,18 +127,18 @@ Enter the complete news article, including its headline if available, for analys
                 </span>
 
                 <div>
-                    <strong>Logistic Regression</strong>
-                    <small>Active Classification Model</small>
+                    <strong>{{ model_name }}</strong>
+                    <small>Selected Classification Model</small>
                 </div>
 
             </div>
 
 
-            <button type="submit" class="analyze-btn">
+            <button type="submit" class="analyze-btn" id="analyzeButton">
 
-                <i class="bi bi-search"></i>
+                <i class="bi bi-search" id="analyzeIcon"></i>
 
-                Analyze News
+                <span id="analyzeButtonText">Analyze News</span>
 
                 <i class="bi bi-arrow-right"></i>
 
@@ -154,7 +163,7 @@ Enter the complete news article, including its headline if available, for analys
         <h4>Machine Learning</h4>
 
         <p>
-            Uses Logistic Regression to classify news articles.
+            Uses the current selected model to classify news articles.
         </p>
 
     </div>
@@ -192,4 +201,40 @@ Enter the complete news article, including its headline if available, for analys
 </section>
 
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const form = document.getElementById("newsForm");
+    const body = document.getElementById("news");
+    const title = document.getElementById("title");
+    const count = document.getElementById("characterCount");
+    const maxCharacters = Number(body.maxLength);
+
+    function updateCount() {
+        count.lastChild.textContent = ` ${title.value.length + body.value.length} / ${maxCharacters} characters`;
+    }
+
+    title.addEventListener("input", updateCount);
+    body.addEventListener("input", updateCount);
+    document.getElementById("clearNews").addEventListener("click", function () {
+        title.value = "";
+        body.value = "";
+        title.focus();
+        updateCount();
+    });
+    form.addEventListener("submit", function (event) {
+        if (!title.value.trim() && !body.value.trim()) {
+            event.preventDefault();
+            body.setCustomValidity("Enter a headline or article body.");
+            body.reportValidity();
+            body.setCustomValidity("");
+            return;
+        }
+        document.getElementById("analyzeButton").disabled = true;
+        document.getElementById("analyzeIcon").className = "bi bi-arrow-repeat loading-spinner";
+        document.getElementById("analyzeButtonText").textContent = "Analyzing...";
+    });
+    updateCount();
+</script>
 {% endblock %}

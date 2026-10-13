@@ -41,24 +41,32 @@
 
             <p class="nav-heading">MAIN</p>
 
-            <a href="{{ url_for('home') }}" class="nav-item">
+            <a href="{{ url_for('home') }}"
+               class="nav-item{% if request.endpoint == 'home' %} active{% endif %}"
+               {% if request.endpoint == 'home' %}aria-current="page"{% endif %}>
                 <i class="bi bi-house"></i>
                 <span>Analyze News</span>
             </a>
 
-            <a href="{{ url_for('dashboard') }}" class="nav-item">
+            <a href="{{ url_for('dashboard') }}"
+               class="nav-item{% if request.endpoint == 'dashboard' %} active{% endif %}"
+               {% if request.endpoint == 'dashboard' %}aria-current="page"{% endif %}>
                 <i class="bi bi-grid-1x2"></i>
                 <span>Dashboard</span>
             </a>
 
-            <a href="{{ url_for('history') }}" class="nav-item">
+            <a href="{{ url_for('history') }}"
+               class="nav-item{% if request.endpoint == 'history' %} active{% endif %}"
+               {% if request.endpoint == 'history' %}aria-current="page"{% endif %}>
                 <i class="bi bi-clock-history"></i>
                 <span>History</span>
             </a>
 
             <p class="nav-heading second-heading">INFORMATION</p>
 
-            <a href="{{ url_for('about') }}" class="nav-item">
+            <a href="{{ url_for('about') }}"
+               class="nav-item{% if request.endpoint == 'about' %} active{% endif %}"
+               {% if request.endpoint == 'about' %}aria-current="page"{% endif %}>
                 <i class="bi bi-info-circle"></i>
                 <span>About Project</span>
             </a>
@@ -72,8 +80,8 @@
                 <span class="status-dot"></span>
 
                 <div>
-                    <strong>Model Active</strong>
-                    <small>Logistic Regression</small>
+                    <strong>Model ready</strong>
+                    <small>{{ model_name }}</small>
                 </div>
 
             </div>
@@ -112,6 +120,11 @@
         <section class="page-content">
             {% block content %}{% endblock %}
         </section>
+
+        <footer class="site-footer">
+            <span>Fake News Detection · Machine learning research project</span>
+            <span>Predictions are not independent fact-checking.</span>
+        </footer>
 
     </main>
 

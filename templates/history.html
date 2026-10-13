@@ -24,10 +24,12 @@
         <div>
             <h3>Analysis Records</h3>
             <p>
-                {% if predictions %}
-                    {{ predictions|length }} prediction{% if predictions|length != 1 %}s{% endif %} recorded
-                {% else %}
+                {% if total_predictions %}
+                    {{ total_predictions }} prediction{% if total_predictions != 1 %}s{% endif %} found
+                {% elif not search and not result_filter %}
                     No predictions recorded yet
+                {% else %}
+                    No records match these filters
                 {% endif %}
             </p>
         </div>
@@ -38,8 +40,26 @@
     </div>
 
 
-    {% if predictions %}
+    <form class="history-filters" method="get" action="{{ url_for('history') }}">
+        <label>
+            <span class="visually-hidden">Search article text</span>
+            <input type="search" name="q" value="{{ search }}" placeholder="Search headlines and articles">
+        </label>
+        <label>
+            <span class="visually-hidden">Filter by prediction</span>
+            <select name="result">
+                <option value="">All classifications</option>
+                <option value="REAL NEWS" {% if result_filter == 'REAL NEWS' %}selected{% endif %}>Real news</option>
+                <option value="FAKE NEWS" {% if result_filter == 'FAKE NEWS' %}selected{% endif %}>Fake news</option>
+            </select>
+        </label>
+        <button type="submit" class="history-filter-button"><i class="bi bi-search"></i> Search</button>
+        {% if search or result_filter %}
+        <a class="history-reset-link" href="{{ url_for('history') }}">Clear filters</a>
+        {% endif %}
+    </form>
 
+    {% if predictions %}
     <div class="table-responsive">
 
         <table class="table history-table">
@@ -49,7 +69,7 @@
                     <th>#</th>
                     <th>News Article</th>
                     <th>Classification</th>
-                    <th>Confidence</th>
+                    <th>Score</th>
                     <th>Date & Time</th>
                 </tr>
             </thead>
@@ -61,7 +81,7 @@
                 <tr>
 
                     <td class="history-number">
-                        {{ loop.index }}
+                        {{ (page - 1) * 10 + loop.index }}
                     </td>
 
                     <td class="history-news">
@@ -86,7 +106,13 @@
                     </td>
 
                     <td class="history-confidence">
-                        {{ item['confidence'] }}%
+                        {% if item['score_type'] in ('predicted_class_probability', 'calibrated_probability') %}
+                            {{ item['confidence'] }}%
+                        {% elif item['score_value'] is not none %}
+                            {{ "%.4f"|format(item['score_value']) }} <small>raw score</small>
+                        {% else %}
+                            Not available
+                        {% endif %}
                     </td>
 
                     <td class="history-date">
@@ -102,6 +128,26 @@
         </table>
 
     </div>
+
+    {% if total_pages > 1 %}
+    <nav class="history-pagination" aria-label="Prediction history pages">
+        {% if page > 1 %}
+        <a href="{{ url_for('history', q=search, result=result_filter, page=page - 1) }}" aria-label="Previous page">
+            <i class="bi bi-chevron-left"></i> Previous
+        </a>
+        {% else %}
+        <span class="pagination-disabled"><i class="bi bi-chevron-left"></i> Previous</span>
+        {% endif %}
+        <span>Page {{ page }} of {{ total_pages }}</span>
+        {% if page < total_pages %}
+        <a href="{{ url_for('history', q=search, result=result_filter, page=page + 1) }}" aria-label="Next page">
+            Next <i class="bi bi-chevron-right"></i>
+        </a>
+        {% else %}
+        <span class="pagination-disabled">Next <i class="bi bi-chevron-right"></i></span>
+        {% endif %}
+    </nav>
+    {% endif %}
 
     {% else %}
 

@@ -2,3 +2,9 @@ venv/
 __pycache__/
 *.py[cod]
 database/history.db
+.env
+.venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

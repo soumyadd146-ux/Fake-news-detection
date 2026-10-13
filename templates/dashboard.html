@@ -8,12 +8,27 @@
 <section class="dashboard-heading">
     <div>
         <h1>Analytics Dashboard</h1>
-        <p>Monitor news analysis activity and model performance.</p>
+        <p>Track article classifications, recent activity, and model performance.</p>
     </div>
 
     <a href="{{ url_for('home') }}" class="dash-analyze-btn">
         <i class="bi bi-plus-circle"></i> Analyze News
     </a>
+</section>
+
+<section class="dashboard-overview" aria-label="Dashboard overview">
+    <div class="overview-copy">
+        <span class="overview-eyebrow">YOUR ANALYSIS OVERVIEW</span>
+        <h2>Clear insights. More informed decisions.</h2>
+        <p>Review your latest results and understand how the classifier is performing.</p>
+    </div>
+    <div class="overview-period">
+        <span class="overview-period-icon"><i class="bi bi-calendar3"></i></span>
+        <div>
+            <span>Today</span>
+            <strong>{{ dashboard_date }}</strong>
+        </div>
+    </div>
 </section>
 
 <!-- Summary Cards -->
@@ -47,6 +62,24 @@
     </div>
 
     <div class="dash-stat-card">
+        <div class="dash-stat-icon orange">
+            <i class="bi bi-calendar-day"></i>
+        </div>
+        <p>Analyzed Today</p>
+        <h2>{{ today_count }}</h2>
+        <span>Articles processed today</span>
+    </div>
+
+    <div class="dash-stat-card">
+        <div class="dash-stat-icon teal">
+            <i class="bi bi-speedometer2"></i>
+        </div>
+        <p>Avg. Confidence</p>
+        <h2>{{ average_confidence }}%</h2>
+        <span>Across your predictions</span>
+    </div>
+
+    <div class="dash-stat-card">
         <div class="dash-stat-icon purple">
             <i class="bi bi-bullseye"></i>
         </div>
@@ -64,7 +97,7 @@
         <div class="dash-panel-heading">
             <div>
                 <h3>Prediction Activity</h3>
-                <p>Daily analyzed articles · Last 7 days</p>
+                <p>{{ weekly_count }} article{% if weekly_count != 1 %}s{% endif %} analyzed this week · Daily activity over 30 days</p>
             </div>
             <span class="panel-icon">
                 <i class="bi bi-graph-up"></i>
@@ -72,7 +105,31 @@
         </div>
 
         <div class="chart-container">
-            <canvas id="activityChart"></canvas>
+            <canvas
+                id="activityChart"
+                data-labels="{{ activity_labels|tojson|forceescape }}"
+                data-values="{{ activity_values|tojson|forceescape }}">
+            </canvas>
+        </div>
+        <div class="chart-footnote">
+            <i class="bi bi-info-circle"></i>
+            Includes quiet days. The comparison is against the previous seven days.
+        </div>
+        <div class="activity-summary">
+            <span>Previous week <strong>{{ previous_week_count }}</strong></span>
+            <span class="activity-trend
+                {% if weekly_change is not none and weekly_change < 0 %}trend-down
+                {% else %}trend-up{% endif %}">
+                {% if weekly_change is none %}
+                    <i class="bi bi-dash"></i> No prior-week baseline
+                {% elif weekly_change > 0 %}
+                    <i class="bi bi-arrow-up-right"></i> {{ weekly_change }}% vs last week
+                {% elif weekly_change < 0 %}
+                    <i class="bi bi-arrow-down-right"></i> {{ weekly_change|abs }}% vs last week
+                {% else %}
+                    <i class="bi bi-dash"></i> No change vs last week
+                {% endif %}
+            </span>
         </div>
     </div>
 
@@ -85,15 +142,94 @@
         </div>
 
         <div class="chart-container doughnut-container">
-            <canvas id="distributionChart"></canvas>
+            {% if total_articles %}
+            <canvas
+                id="distributionChart"
+                data-real="{{ real_count }}"
+                data-fake="{{ fake_count }}">
+            </canvas>
+            {% else %}
+            <div class="chart-empty">
+                <i class="bi bi-pie-chart"></i>
+                <span>Analyze an article to see the classification breakdown.</span>
+            </div>
+            {% endif %}
         </div>
 
+        {% if total_articles %}
         <div class="chart-legend">
-            <span><i class="legend-dot real-dot"></i> Real News</span>
-            <span><i class="legend-dot fake-dot"></i> Fake News</span>
+            <span><i class="legend-dot real-dot"></i> Real News <strong>{{ real_share }}%</strong></span>
+            <span><i class="legend-dot fake-dot"></i> Fake News <strong>{{ fake_share }}%</strong></span>
         </div>
+        {% endif %}
+
     </div>
 
+</section>
+
+<section class="dashboard-insights">
+    <div class="dash-panel insight-panel">
+        <div class="dash-panel-heading">
+            <div>
+                <h3>Predicted-class probability profile</h3>
+                <p>Confidence bands from stored probability-based predictions</p>
+            </div>
+            <span class="panel-icon"><i class="bi bi-speedometer"></i></span>
+        </div>
+        <div class="confidence-band-list">
+            <div class="confidence-band high-band">
+                <span class="confidence-band-icon"><i class="bi bi-check2-circle"></i></span>
+                <span class="confidence-band-label"><strong>High · 85–100%</strong><small>Higher model certainty; still verify independently</small></span>
+                <strong class="confidence-band-count">{{ high_probability_count }}</strong>
+            </div>
+            <div class="confidence-band medium-band">
+                <span class="confidence-band-icon"><i class="bi bi-dash-circle"></i></span>
+                <span class="confidence-band-label"><strong>Moderate · 60–84%</strong><small>Review the article and supporting sources</small></span>
+                <strong class="confidence-band-count">{{ moderate_probability_count }}</strong>
+            </div>
+            <div class="confidence-band low-band">
+                <span class="confidence-band-icon"><i class="bi bi-exclamation-circle"></i></span>
+                <span class="confidence-band-label"><strong>Low · Under 60%</strong><small>Model suggests extra caution</small></span>
+                <strong class="confidence-band-count">{{ review_suggested_count }}</strong>
+            </div>
+        </div>
+        <p class="metric-note">
+            <i class="bi bi-info-circle"></i>
+            These bands describe the model output, not the likelihood that a story is true.
+            Raw SVM decision scores are excluded.
+        </p>
+    </div>
+
+    <div class="dash-panel benchmark-panel">
+        <div class="dash-panel-heading">
+            <div>
+                <h3>Model validation benchmark</h3>
+                <p>Cross-validation macro F1 · separate from test results</p>
+            </div>
+            <span class="panel-icon"><i class="bi bi-trophy"></i></span>
+        </div>
+        {% if model_comparison %}
+        <div class="benchmark-list">
+            {% for candidate in model_comparison %}
+            <div class="benchmark-item{% if candidate.selected %} benchmark-selected{% endif %}">
+                <div class="benchmark-label">
+                    <span>{{ candidate.name }}{% if candidate.selected %}<em>Selected</em>{% endif %}</span>
+                    <strong>{{ candidate.score }}%</strong>
+                </div>
+                <div class="performance-track">
+                    <div class="performance-fill" style="width: {{ [candidate.score, 100]|min }}%"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="benchmark-empty">
+            <i class="bi bi-bar-chart-line"></i>
+            <p>Validation comparison is not available in the current metrics file.</p>
+            <small>Run <code>python train_model.py</code> to generate validation benchmarks.</small>
+        </div>
+        {% endif %}
+    </div>
 </section>
 
 <!-- Model Metrics -->
@@ -101,12 +237,22 @@
     <div class="dash-panel-heading">
         <div>
             <h3>Model Performance</h3>
-            <p>Logistic Regression · Evaluation metrics</p>
+            <p>{{ model_name }} · Held-out test evaluation metrics</p>
         </div>
         <span class="model-badge">TF-IDF + ML</span>
     </div>
 
     <div class="performance-grid">
+        <div class="performance-item">
+            <div class="performance-label">
+                <span>Accuracy</span>
+                <strong>{{ accuracy }}%</strong>
+            </div>
+            <div class="performance-track">
+                <div class="performance-fill" style="width: {{ accuracy }}%"></div>
+            </div>
+        </div>
+
         <div class="performance-item">
             <div class="performance-label">
                 <span>Precision</span>
@@ -135,6 +281,42 @@
             <div class="performance-track">
                 <div class="performance-fill" style="width: {{ f1_score }}%"></div>
             </div>
+        </div>
+    </div>
+    <div class="metric-note">
+        <i class="bi bi-lightbulb"></i>
+        <span>These scores come from the model's held-out test dataset, not from your prediction history.</span>
+    </div>
+</section>
+
+<section class="dash-panel dataset-panel">
+    <div class="dash-panel-heading">
+        <div>
+            <h3>Model &amp; Dataset</h3>
+            <p>Training context for the current classifier</p>
+        </div>
+        <span class="panel-icon"><i class="bi bi-cpu"></i></span>
+    </div>
+    <div class="dataset-grid">
+        <div class="dataset-item">
+            <span>Training articles</span>
+            <strong>{{ training_articles }}</strong>
+            <small>Used to fit the model</small>
+        </div>
+        <div class="dataset-item">
+            <span>Test articles</span>
+            <strong>{{ testing_articles }}</strong>
+            <small>Used for evaluation</small>
+        </div>
+        <div class="dataset-item">
+            <span>Total dataset</span>
+            <strong>{{ total_dataset_articles }}</strong>
+            <small>Articles in the dataset</small>
+        </div>
+        <div class="dataset-item">
+            <span>ROC AUC</span>
+            <strong>{{ roc_auc }}%</strong>
+            <small>Held-out test dataset</small>
         </div>
     </div>
 </section>
@@ -182,8 +364,16 @@
                         </span>
                     </td>
 
-                    <td>{{ item['confidence'] }}%</td>
-                    <td>{{ item['created_at'] }}</td>
+                    <td>
+                        {% if item['score_type'] in ('predicted_class_probability', 'calibrated_probability') %}
+                            {{ item['confidence'] }}%
+                        {% elif item['score_value'] is not none %}
+                            {{ "%.4f"|format(item['score_value']) }} <small>raw score</small>
+                        {% else %}
+                            Not available
+                        {% endif %}
+                    </td>
+                    <td class="prediction-date">{{ item['created_at'] }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -211,63 +401,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-    // Dynamic prediction activity chart
-    const activityLabels = {{ activity_labels | tojson }};
-    const activityValues = {{ activity_values | tojson }};
-
-    new Chart(document.getElementById("activityChart"), {
-        type: "line",
-        data: {
-            labels: activityLabels,
-            datasets: [{
-                label: "Articles Analyzed",
-                data: activityValues,
-                borderColor: "#5267e8",
-                backgroundColor: "rgba(82, 103, 232, 0.10)",
-                fill: true,
-                tension: 0.4,
-                pointRadius: 4,
-                pointHoverRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { precision: 0 }
-                }
-            }
-        }
-    });
-
-    // Dynamic Real vs Fake chart
-    new Chart(document.getElementById("distributionChart"), {
-        type: "doughnut",
-        data: {
-            labels: ["Real News", "Fake News"],
-            datasets: [{
-                data: [{{ real_count }}, {{ fake_count }}],
-                backgroundColor: ["#16a36a", "#ef5350"],
-                borderWidth: 0,
-                hoverOffset: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: "72%",
-            plugins: {
-                legend: { display: false }
-            }
-        }
-    });
-</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}" defer></script>
 {% endblock %}

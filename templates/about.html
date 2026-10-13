@@ -22,7 +22,7 @@ About Project
 
             <p>
                 Machine Learning Based News Classification using
-                Natural Language Processing and Logistic Regression.
+                Natural Language Processing and {{ model_metadata.algorithm|default('Logistic Regression') }}.
             </p>
         </div>
     </div>
@@ -48,8 +48,8 @@ About Project
             <p>
                 The system uses Natural Language Processing to preprocess
                 news content and TF-IDF to convert textual information into
-                numerical features. A Logistic Regression classification
-                model is then used to perform the final classification.
+                numerical features. The selected model is then used to make
+                a binary classification.
             </p>
 
             <p>
@@ -151,7 +151,7 @@ About Project
                 <div class="workflow-item">
                     <span>04</span>
                     <div>
-                        <strong>Logistic Regression</strong>
+                        <strong>{{ model_metadata.algorithm|default('Logistic Regression') }}</strong>
                         <small>The trained model performs classification.</small>
                     </div>
                 </div>
@@ -281,17 +281,18 @@ About Project
             <h2>Machine Learning Model</h2>
 
             <p>
-                The system uses <strong>Logistic Regression</strong> as the
-                classification algorithm. The model is trained using the
-                ISOT Fake News Dataset after converting news text into
-                TF-IDF features.
+                The system selects a classifier using group-aware validation
+                macro F1, then evaluates it on a separate held-out test split.
+                The training module compares Logistic Regression, Linear SVM,
+                Passive-Aggressive, and Multinomial Naive Bayes. Random Forest
+                is available as an optional comparison.
             </p>
 
             <div class="model-details">
 
                 <div>
                     <span>Algorithm</span>
-                    <strong>Logistic Regression</strong>
+                    <strong>{{ model_metadata.algorithm|default('Logistic Regression') }}</strong>
                 </div>
 
                 <div>
@@ -326,22 +327,22 @@ About Project
 
                 <div class="metric-item">
                     <span>Accuracy</span>
-                    <strong>99.28%</strong>
+                    <strong>{{ metrics.get('accuracy', 'Not available') }}{% if metrics.get('accuracy') is not none %}%{% endif %}</strong>
                 </div>
 
                 <div class="metric-item">
                     <span>Precision</span>
-                    <strong>99.12%</strong>
+                    <strong>{{ metrics.get('precision', 'Not available') }}{% if metrics.get('precision') is not none %}%{% endif %}</strong>
                 </div>
 
                 <div class="metric-item">
                     <span>Recall</span>
-                    <strong>99.37%</strong>
+                    <strong>{{ metrics.get('recall', 'Not available') }}{% if metrics.get('recall') is not none %}%{% endif %}</strong>
                 </div>
 
                 <div class="metric-item">
                     <span>F1-Score</span>
-                    <strong>99.24%</strong>
+                    <strong>{{ metrics.get('f1_score', 'Not available') }}{% if metrics.get('f1_score') is not none %}%{% endif %}</strong>
                 </div>
 
             </div>
@@ -363,30 +364,32 @@ About Project
             <h2>Dataset</h2>
 
             <p>
-                The system is trained using the <strong>ISOT Fake News Dataset</strong>,
-                containing separate collections of fake and real news articles.
+                The project reads the provided <strong>dataset/Fake.csv</strong> and
+                <strong>dataset/True.csv</strong> files. Records with no usable text
+                and exact duplicate content are removed before a reproducible,
+                group-aware stratified split.
             </p>
 
             <div class="dataset-stats">
 
                 <div>
-                    <strong>44,898</strong>
+                    <strong>{{ metrics.get('total_dataset_articles', metrics.get('dataset_report', {}).get('rows_used', 'Not available')) }}</strong>
                     <span>Total Articles</span>
                 </div>
 
                 <div>
-                    <strong>23,481</strong>
+                    <strong>{{ metrics.get('dataset_report', {}).get('class_counts', {}).get('FAKE NEWS', 'Not available') }}</strong>
                     <span>Fake Articles</span>
                 </div>
 
                 <div>
-                    <strong>21,417</strong>
+                    <strong>{{ metrics.get('dataset_report', {}).get('class_counts', {}).get('REAL NEWS', 'Not available') }}</strong>
                     <span>Real Articles</span>
                 </div>
 
                 <div>
-                    <strong>50,000</strong>
-                    <span>Maximum TF-IDF Features</span>
+                    <strong>{{ metrics.get('training_articles', 'Not available') }}</strong>
+                    <span>Training records after cleaning</span>
                 </div>
 
             </div>
@@ -402,9 +405,7 @@ About Project
         <i class="bi bi-info-circle"></i>
 
         <p>
-            This system provides machine learning based classification of
-            news text. A prediction should not be considered independent
-            verification of the factual accuracy of an article.
+            This system classifies news using learned dataset patterns. Predictions are not independent fact-checking or proof that a claim is true. Dataset source bias, duplicated reporting, topic drift, and linguistic shortcuts can affect results.
         </p>
 
     </div>
