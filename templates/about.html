@@ -1,0 +1,430 @@
+{% extends "base.html" %}
+
+{% block title %}About Project | Fake News Detection{% endblock %}
+
+{% block page_title %}
+About Project
+{% endblock %}
+
+{% block content %}
+
+<div class="about-page">
+
+    <!-- Page Header -->
+    <div class="about-heading">
+        <div>
+            <span class="about-tag">
+                <i class="bi bi-info-circle"></i>
+                PROJECT INFORMATION
+            </span>
+
+            <h1>Fake News Detection</h1>
+
+            <p>
+                Machine Learning Based News Classification using
+                Natural Language Processing and Logistic Regression.
+            </p>
+        </div>
+    </div>
+
+
+    <!-- Project Overview -->
+    <div class="about-card overview-card">
+
+        <div class="about-card-icon blue">
+            <i class="bi bi-shield-check"></i>
+        </div>
+
+        <div class="about-card-content">
+
+            <h2>Project Overview</h2>
+
+            <p>
+                Fake News Detection is a machine learning based system
+                developed to classify news articles as <strong>Real News</strong>
+                or <strong>Fake News</strong>.
+            </p>
+
+            <p>
+                The system uses Natural Language Processing to preprocess
+                news content and TF-IDF to convert textual information into
+                numerical features. A Logistic Regression classification
+                model is then used to perform the final classification.
+            </p>
+
+            <p>
+                The application provides a simple web interface where users
+                can enter a news article and view the predicted class along
+                with the model confidence. Prediction results are stored in
+                a SQLite database for history and dashboard analysis.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- Objective + System Flow -->
+    <div class="about-grid">
+
+        <!-- Objective -->
+        <div class="about-card">
+
+            <div class="about-card-icon purple">
+                <i class="bi bi-bullseye"></i>
+            </div>
+
+            <h2>Project Objective</h2>
+
+            <ul class="about-list">
+
+                <li>
+                    <i class="bi bi-check-circle-fill"></i>
+                    Classify news articles as real or fake using Machine Learning.
+                </li>
+
+                <li>
+                    <i class="bi bi-check-circle-fill"></i>
+                    Apply Natural Language Processing for text preprocessing.
+                </li>
+
+                <li>
+                    <i class="bi bi-check-circle-fill"></i>
+                    Extract meaningful text features using TF-IDF.
+                </li>
+
+                <li>
+                    <i class="bi bi-check-circle-fill"></i>
+                    Provide prediction confidence through the web application.
+                </li>
+
+                <li>
+                    <i class="bi bi-check-circle-fill"></i>
+                    Maintain prediction history using SQLite.
+                </li>
+
+                <li>
+                    <i class="bi bi-check-circle-fill"></i>
+                    Present analysis and model performance through a dashboard.
+                </li>
+
+            </ul>
+
+        </div>
+
+
+        <!-- System Flow -->
+        <div class="about-card">
+
+            <div class="about-card-icon green">
+                <i class="bi bi-diagram-3"></i>
+            </div>
+
+            <h2>System Workflow</h2>
+
+            <div class="workflow-list">
+
+                <div class="workflow-item">
+                    <span>01</span>
+                    <div>
+                        <strong>News Input</strong>
+                        <small>User enters the news article.</small>
+                    </div>
+                </div>
+
+                <div class="workflow-item">
+                    <span>02</span>
+                    <div>
+                        <strong>Text Preprocessing</strong>
+                        <small>News text is cleaned and prepared.</small>
+                    </div>
+                </div>
+
+                <div class="workflow-item">
+                    <span>03</span>
+                    <div>
+                        <strong>TF-IDF</strong>
+                        <small>Text is converted into numerical features.</small>
+                    </div>
+                </div>
+
+                <div class="workflow-item">
+                    <span>04</span>
+                    <div>
+                        <strong>Logistic Regression</strong>
+                        <small>The trained model performs classification.</small>
+                    </div>
+                </div>
+
+                <div class="workflow-item">
+                    <span>05</span>
+                    <div>
+                        <strong>Result & History</strong>
+                        <small>Prediction is displayed and stored.</small>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Technology Stack -->
+    <div class="about-card technology-card">
+
+        <div class="about-section-header">
+
+            <div>
+                <h2>Technology Stack</h2>
+
+                <p>
+                    Technologies and techniques used to develop the system.
+                </p>
+            </div>
+
+            <div class="about-card-icon blue">
+                <i class="bi bi-code-square"></i>
+            </div>
+
+        </div>
+
+
+        <div class="technology-grid">
+
+            <div class="technology-item">
+                <div class="technology-icon python-icon">
+                    <i class="bi bi-filetype-py"></i>
+                </div>
+
+                <div>
+                    <strong>Python</strong>
+                    <span>Programming Language</span>
+                </div>
+            </div>
+
+
+            <div class="technology-item">
+                <div class="technology-icon flask-icon">
+                    <i class="bi bi-window"></i>
+                </div>
+
+                <div>
+                    <strong>Flask</strong>
+                    <span>Web Framework</span>
+                </div>
+            </div>
+
+
+            <div class="technology-item">
+                <div class="technology-icon ml-icon">
+                    <i class="bi bi-cpu"></i>
+                </div>
+
+                <div>
+                    <strong>Scikit-learn</strong>
+                    <span>Machine Learning</span>
+                </div>
+            </div>
+
+
+            <div class="technology-item">
+                <div class="technology-icon nlp-icon">
+                    <i class="bi bi-chat-square-text"></i>
+                </div>
+
+                <div>
+                    <strong>TF-IDF</strong>
+                    <span>Text Feature Extraction</span>
+                </div>
+            </div>
+
+
+            <div class="technology-item">
+                <div class="technology-icon database-icon">
+                    <i class="bi bi-database"></i>
+                </div>
+
+                <div>
+                    <strong>SQLite</strong>
+                    <span>Prediction Database</span>
+                </div>
+            </div>
+
+
+            <div class="technology-item">
+                <div class="technology-icon frontend-icon">
+                    <i class="bi bi-layout-text-window"></i>
+                </div>
+
+                <div>
+                    <strong>HTML & CSS</strong>
+                    <span>Frontend Interface</span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ML Model -->
+    <div class="about-grid model-grid">
+
+        <div class="about-card">
+
+            <div class="about-card-icon orange">
+                <i class="bi bi-robot"></i>
+            </div>
+
+            <h2>Machine Learning Model</h2>
+
+            <p>
+                The system uses <strong>Logistic Regression</strong> as the
+                classification algorithm. The model is trained using the
+                ISOT Fake News Dataset after converting news text into
+                TF-IDF features.
+            </p>
+
+            <div class="model-details">
+
+                <div>
+                    <span>Algorithm</span>
+                    <strong>Logistic Regression</strong>
+                </div>
+
+                <div>
+                    <span>Feature Extraction</span>
+                    <strong>TF-IDF</strong>
+                </div>
+
+                <div>
+                    <span>Classification</span>
+                    <strong>Binary Classification</strong>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="about-card">
+
+            <div class="about-card-icon red">
+                <i class="bi bi-bar-chart-line"></i>
+            </div>
+
+            <h2>Model Performance</h2>
+
+            <p>
+                The following values are obtained from the held-out test
+                dataset used during model evaluation.
+            </p>
+
+            <div class="about-metrics">
+
+                <div class="metric-item">
+                    <span>Accuracy</span>
+                    <strong>99.28%</strong>
+                </div>
+
+                <div class="metric-item">
+                    <span>Precision</span>
+                    <strong>99.12%</strong>
+                </div>
+
+                <div class="metric-item">
+                    <span>Recall</span>
+                    <strong>99.37%</strong>
+                </div>
+
+                <div class="metric-item">
+                    <span>F1-Score</span>
+                    <strong>99.24%</strong>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Dataset -->
+    <div class="about-card dataset-card">
+
+        <div class="about-card-icon teal">
+            <i class="bi bi-database-check"></i>
+        </div>
+
+        <div class="dataset-content">
+
+            <h2>Dataset</h2>
+
+            <p>
+                The system is trained using the <strong>ISOT Fake News Dataset</strong>,
+                containing separate collections of fake and real news articles.
+            </p>
+
+            <div class="dataset-stats">
+
+                <div>
+                    <strong>44,898</strong>
+                    <span>Total Articles</span>
+                </div>
+
+                <div>
+                    <strong>23,481</strong>
+                    <span>Fake Articles</span>
+                </div>
+
+                <div>
+                    <strong>21,417</strong>
+                    <span>Real Articles</span>
+                </div>
+
+                <div>
+                    <strong>50,000</strong>
+                    <span>Maximum TF-IDF Features</span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Disclaimer -->
+    <div class="about-disclaimer">
+
+        <i class="bi bi-info-circle"></i>
+
+        <p>
+            This system provides machine learning based classification of
+            news text. A prediction should not be considered independent
+            verification of the factual accuracy of an article.
+        </p>
+
+    </div>
+
+
+    <!-- Bottom Actions -->
+    <div class="about-actions">
+
+        <a href="{{ url_for('home') }}" class="about-primary-btn">
+            <i class="bi bi-search"></i>
+            Analyze News
+        </a>
+
+        <a href="{{ url_for('dashboard') }}" class="about-secondary-btn">
+            <i class="bi bi-grid-1x2"></i>
+            View Dashboard
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

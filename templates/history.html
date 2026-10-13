@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}History | Fake News Detection{% endblock %}
+{% block page_title %}History{% endblock %}
+
+{% block content %}
+
+<section class="history-heading">
+    <div>
+        <h1>Prediction History</h1>
+        <p>View previously analyzed news articles and their classifications.</p>
+    </div>
+
+    <a href="{{ url_for('home') }}" class="history-analyze-btn">
+        <i class="bi bi-plus-circle"></i>
+        Analyze News
+    </a>
+</section>
+
+
+<section class="history-panel">
+
+    <div class="history-panel-header">
+        <div>
+            <h3>Analysis Records</h3>
+            <p>
+                {% if predictions %}
+                    {{ predictions|length }} prediction{% if predictions|length != 1 %}s{% endif %} recorded
+                {% else %}
+                    No predictions recorded yet
+                {% endif %}
+            </p>
+        </div>
+
+        <span class="history-icon">
+            <i class="bi bi-clock-history"></i>
+        </span>
+    </div>
+
+
+    {% if predictions %}
+
+    <div class="table-responsive">
+
+        <table class="table history-table">
+
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>News Article</th>
+                    <th>Classification</th>
+                    <th>Confidence</th>
+                    <th>Date & Time</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for item in predictions %}
+
+                <tr>
+
+                    <td class="history-number">
+                        {{ loop.index }}
+                    </td>
+
+                    <td class="history-news">
+                        {{ item['news'][:100] }}
+                        {% if item['news']|length > 100 %}
+                            ...
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if item['result'] == 'REAL NEWS' %}
+                            <span class="history-pill real-history">
+                                <i class="bi bi-check-circle"></i>
+                                REAL NEWS
+                            </span>
+                        {% else %}
+                            <span class="history-pill fake-history">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                FAKE NEWS
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td class="history-confidence">
+                        {{ item['confidence'] }}%
+                    </td>
+
+                    <td class="history-date">
+                        {{ item['created_at'] }}
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    {% else %}
+
+    <div class="history-empty">
+
+        <div class="history-empty-icon">
+            <i class="bi bi-clock-history"></i>
+        </div>
+
+        <h3>No Prediction History</h3>
+
+        <p>
+            You have not analyzed any news articles yet.
+            Start by submitting a news article for classification.
+        </p>
+
+        <a href="{{ url_for('home') }}" class="history-analyze-btn">
+            <i class="bi bi-file-text"></i>
+            Analyze Your First Article
+        </a>
+
+    </div>
+
+    {% endif %}
+
+</section>
+
+
+<div class="history-note">
+    <i class="bi bi-info-circle"></i>
+
+    <span>
+        Prediction history is stored locally in the project's SQLite database.
+        Results represent machine learning classifications and are not independent
+        verification of news authenticity.
+    </span>
+</div>
+
+{% endblock %}

@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | Fake News Detection{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<section class="dashboard-heading">
+    <div>
+        <h1>Analytics Dashboard</h1>
+        <p>Monitor news analysis activity and model performance.</p>
+    </div>
+
+    <a href="{{ url_for('home') }}" class="dash-analyze-btn">
+        <i class="bi bi-plus-circle"></i> Analyze News
+    </a>
+</section>
+
+<!-- Summary Cards -->
+<section class="dashboard-stats">
+
+    <div class="dash-stat-card">
+        <div class="dash-stat-icon blue">
+            <i class="bi bi-files"></i>
+        </div>
+        <p>Total Articles</p>
+        <h2>{{ total_articles }}</h2>
+        <span>Articles analyzed</span>
+    </div>
+
+    <div class="dash-stat-card">
+        <div class="dash-stat-icon green">
+            <i class="bi bi-check-circle"></i>
+        </div>
+        <p>Real News</p>
+        <h2>{{ real_count }}</h2>
+        <span>Classified as real</span>
+    </div>
+
+    <div class="dash-stat-card">
+        <div class="dash-stat-icon red">
+            <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <p>Fake News</p>
+        <h2>{{ fake_count }}</h2>
+        <span>Classified as fake</span>
+    </div>
+
+    <div class="dash-stat-card">
+        <div class="dash-stat-icon purple">
+            <i class="bi bi-bullseye"></i>
+        </div>
+        <p>Model Accuracy</p>
+        <h2>{{ accuracy }}%</h2>
+        <span>Held-out test dataset</span>
+    </div>
+
+</section>
+
+<!-- Charts -->
+<section class="dashboard-charts">
+
+    <div class="dash-panel activity-panel">
+        <div class="dash-panel-heading">
+            <div>
+                <h3>Prediction Activity</h3>
+                <p>Daily analyzed articles · Last 7 days</p>
+            </div>
+            <span class="panel-icon">
+                <i class="bi bi-graph-up"></i>
+            </span>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="activityChart"></canvas>
+        </div>
+    </div>
+
+    <div class="dash-panel distribution-panel">
+        <div class="dash-panel-heading">
+            <div>
+                <h3>News Distribution</h3>
+                <p>Real vs Fake classifications</p>
+            </div>
+        </div>
+
+        <div class="chart-container doughnut-container">
+            <canvas id="distributionChart"></canvas>
+        </div>
+
+        <div class="chart-legend">
+            <span><i class="legend-dot real-dot"></i> Real News</span>
+            <span><i class="legend-dot fake-dot"></i> Fake News</span>
+        </div>
+    </div>
+
+</section>
+
+<!-- Model Metrics -->
+<section class="dash-panel model-performance">
+    <div class="dash-panel-heading">
+        <div>
+            <h3>Model Performance</h3>
+            <p>Logistic Regression · Evaluation metrics</p>
+        </div>
+        <span class="model-badge">TF-IDF + ML</span>
+    </div>
+
+    <div class="performance-grid">
+        <div class="performance-item">
+            <div class="performance-label">
+                <span>Precision</span>
+                <strong>{{ precision }}%</strong>
+            </div>
+            <div class="performance-track">
+                <div class="performance-fill" style="width: {{ precision }}%"></div>
+            </div>
+        </div>
+
+        <div class="performance-item">
+            <div class="performance-label">
+                <span>Recall</span>
+                <strong>{{ recall }}%</strong>
+            </div>
+            <div class="performance-track">
+                <div class="performance-fill" style="width: {{ recall }}%"></div>
+            </div>
+        </div>
+
+        <div class="performance-item">
+            <div class="performance-label">
+                <span>F1-Score</span>
+                <strong>{{ f1_score }}%</strong>
+            </div>
+            <div class="performance-track">
+                <div class="performance-fill" style="width: {{ f1_score }}%"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Predictions -->
+<section class="dash-panel recent-panel">
+    <div class="dash-panel-heading">
+        <div>
+            <h3>Recent Predictions</h3>
+            <p>Your latest analyzed articles</p>
+        </div>
+
+        <a href="{{ url_for('history') }}" class="view-all-link">
+            View History <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+
+    {% if recent_predictions %}
+    <div class="table-responsive">
+        <table class="table dash-table">
+            <thead>
+                <tr>
+                    <th>Article</th>
+                    <th>Classification</th>
+                    <th>Confidence</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in recent_predictions %}
+                <tr>
+                    <td class="article-cell">
+                        {{ item['news'][:85] }}{% if item['news']|length > 85 %}...{% endif %}
+                    </td>
+
+                    <td>
+                        <span class="result-pill
+                            {% if item['result'] == 'REAL NEWS' %}
+                                real-pill
+                            {% else %}
+                                fake-pill
+                            {% endif %}">
+                            {{ item['result'] }}
+                        </span>
+                    </td>
+
+                    <td>{{ item['confidence'] }}%</td>
+                    <td>{{ item['created_at'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+    <div class="empty-dashboard">
+        <i class="bi bi-bar-chart"></i>
+        <h4>No predictions yet</h4>
+        <p>Analyze your first news article to see dashboard statistics.</p>
+        <a href="{{ url_for('home') }}" class="dash-analyze-btn">
+            Analyze News
+        </a>
+    </div>
+    {% endif %}
+</section>
+
+<p class="dashboard-disclaimer">
+    <i class="bi bi-info-circle"></i>
+    Predictions are generated by a machine learning model and should not
+    be treated as independent verification of news authenticity.
+</p>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Dynamic prediction activity chart
+    const activityLabels = {{ activity_labels | tojson }};
+    const activityValues = {{ activity_values | tojson }};
+
+    new Chart(document.getElementById("activityChart"), {
+        type: "line",
+        data: {
+            labels: activityLabels,
+            datasets: [{
+                label: "Articles Analyzed",
+                data: activityValues,
+                borderColor: "#5267e8",
+                backgroundColor: "rgba(82, 103, 232, 0.10)",
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 }
+                }
+            }
+        }
+    });
+
+    // Dynamic Real vs Fake chart
+    new Chart(document.getElementById("distributionChart"), {
+        type: "doughnut",
+        data: {
+            labels: ["Real News", "Fake News"],
+            datasets: [{
+                data: [{{ real_count }}, {{ fake_count }}],
+                backgroundColor: ["#16a36a", "#ef5350"],
+                borderWidth: 0,
+                hoverOffset: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "72%",
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+</script>
+{% endblock %}

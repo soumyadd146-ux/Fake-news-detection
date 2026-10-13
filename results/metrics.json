@@ -1,0 +1,11 @@
+{
+    "algorithm": "Logistic Regression",
+    "accuracy": 99.28,
+    "precision": 99.12,
+    "recall": 99.37,
+    "f1_score": 99.24,
+    "roc_auc": 0.9994,
+    "training_articles": 35911,
+    "testing_articles": 8978,
+    "total_dataset_articles": 44889
+}

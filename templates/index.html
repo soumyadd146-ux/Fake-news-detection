@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Analyze News | Fake News Detection{% endblock %}
+
+{% block page_title %}Analyze News{% endblock %}
+
+{% block content %}
+
+<!-- Welcome Section -->
+<section class="welcome-section">
+
+    <div class="welcome-text">
+
+        <span class="section-tag">
+            <i class="bi bi-shield-check"></i>
+            MACHINE LEARNING BASED CLASSIFICATION
+        </span>
+
+        <h2>
+            Fake News <span>Detection</span>
+        </h2>
+
+        <p>
+            Analyze news articles using Machine Learning and
+            Natural Language Processing to identify potentially
+            fake or real news.
+        </p>
+
+    </div>
+
+    <div class="welcome-icon">
+        <i class="bi bi-newspaper"></i>
+    </div>
+
+</section>
+
+
+<!-- Analysis Card -->
+<section class="analyzer-card">
+
+    <div class="analyzer-header">
+
+        <div class="analyzer-icon">
+            <i class="bi bi-file-earmark-text"></i>
+        </div>
+
+        <div>
+            <h3>News Article Analysis</h3>
+
+            <p>
+                Enter the news content you want to analyze.
+            </p>
+        </div>
+
+    </div>
+
+
+    <!-- Error Message -->
+    {% if error %}
+
+    <div class="error-message">
+        <i class="bi bi-exclamation-circle"></i>
+        {{ error }}
+    </div>
+
+    {% endif %}
+
+
+    <!-- News Input Form -->
+    <form action="{{ url_for('predict') }}"
+          method="POST"
+          id="newsForm">
+
+        <label for="news" class="input-label">
+            News Content
+        </label>
+
+        <textarea
+            id="news"
+            name="news"
+            class="news-textarea"
+            placeholder="Paste your news article here...
+
+For example:
+Enter the complete news article, including its headline if available, for analysis."
+            required
+        ></textarea>
+
+
+        <div class="input-footer">
+
+            <span>
+                <i class="bi bi-info-circle"></i>
+                Enter the article text for analysis
+            </span>
+
+            <button
+                type="button"
+                class="clear-btn"
+                onclick="document.getElementById('news').value='';"
+            >
+                <i class="bi bi-x-circle"></i>
+                Clear Text
+            </button>
+
+        </div>
+
+
+        <div class="analyzer-divider"></div>
+
+
+        <div class="analyzer-actions">
+
+            <div class="model-info">
+
+                <span class="model-info-icon">
+                    <i class="bi bi-cpu"></i>
+                </span>
+
+                <div>
+                    <strong>Logistic Regression</strong>
+                    <small>Active Classification Model</small>
+                </div>
+
+            </div>
+
+
+            <button type="submit" class="analyze-btn">
+
+                <i class="bi bi-search"></i>
+
+                Analyze News
+
+                <i class="bi bi-arrow-right"></i>
+
+            </button>
+
+        </div>
+
+    </form>
+
+</section>
+
+
+<!-- Information Cards -->
+<section class="info-cards">
+
+    <div class="info-card">
+
+        <div class="info-card-icon blue">
+            <i class="bi bi-cpu"></i>
+        </div>
+
+        <h4>Machine Learning</h4>
+
+        <p>
+            Uses Logistic Regression to classify news articles.
+        </p>
+
+    </div>
+
+
+    <div class="info-card">
+
+        <div class="info-card-icon purple">
+            <i class="bi bi-text-paragraph"></i>
+        </div>
+
+        <h4>NLP + TF-IDF</h4>
+
+        <p>
+            Converts news text into numerical features for analysis.
+        </p>
+
+    </div>
+
+
+    <div class="info-card">
+
+        <div class="info-card-icon green">
+            <i class="bi bi-graph-up-arrow"></i>
+        </div>
+
+        <h4>Instant Results</h4>
+
+        <p>
+            Displays the predicted class and model confidence score.
+        </p>
+
+    </div>
+
+</section>
+
+
+{% endblock %}
