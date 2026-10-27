@@ -13,7 +13,7 @@ from sklearn.model_selection import GridSearchCV, StratifiedGroupKFold
 
 from src.evaluate import evaluate_model, save_evaluation, save_model_comparison
 from src.features import candidate_models, make_pipeline
-from src.preprocessing import load_dataset
+from src.preprocessing import load_dataset, load_labeled_examples
 
 
 BASE_DIR = Path(__file__).resolve().parents[1]
@@ -33,6 +33,7 @@ def train(
     results_path.mkdir(parents=True, exist_ok=True)
 
     data, dataset_report = load_dataset(dataset_dir)
+    labeled_examples = load_labeled_examples(dataset_dir)
     documents = data["content"].to_numpy()
     labels = data["label"].to_numpy()
     groups = data["group"].to_numpy()
@@ -94,6 +95,15 @@ def train(
         raise RuntimeError("No model candidate completed training")
 
     model = best_search.best_estimator_
+    weighted_examples = labeled_examples.loc[
+        labeled_examples.index.repeat(labeled_examples["weight"])
+    ]
+    fit_documents = np.concatenate(
+        [X_train, weighted_examples["content"].to_numpy()]
+    )
+    fit_labels = np.concatenate(
+        [y_train, weighted_examples["label"].to_numpy(dtype=int)]
+    )
     selected_classifier = model.named_steps["classifier"]
     model.set_params(
         classifier=CalibratedClassifierCV(
@@ -103,7 +113,7 @@ def train(
         )
     )
     final_training_started = time.perf_counter()
-    model.fit(X_train, y_train)
+    model.fit(fit_documents, fit_labels)
     final_training_seconds = time.perf_counter() - final_training_started
     prediction_started = time.perf_counter()
     model.predict(X_test)
@@ -123,9 +133,11 @@ def train(
             "validation_macro_f1": comparison[best_name]["cv_macro_f1"],
             "validation_macro_f1_std": comparison[best_name]["cv_macro_f1_std"],
             "selection_parameters": comparison[best_name]["best_parameters"],
-            "training_articles": int(len(train_indices)),
+            "training_articles": int(len(train_indices) + len(labeled_examples)),
             "testing_articles": int(len(test_indices)),
-            "total_dataset_articles": dataset_report.rows_used,
+            "total_dataset_articles": dataset_report.rows_used + len(labeled_examples),
+            "labeled_training_examples": int(len(labeled_examples)),
+            "labeled_training_example_weight": int(labeled_examples["weight"].sum()),
             "dataset_report": dataset_report.to_dict(),
             "class_counts": dataset_report.class_counts,
             "training_seconds": round(
@@ -155,8 +167,10 @@ def train(
         "random_state": random_state,
         "sklearn_version": sklearn.__version__,
         "dataset_report": dataset_report.to_dict(),
-        "training_articles": int(len(train_indices)),
+        "training_articles": int(len(train_indices) + len(labeled_examples)),
         "testing_articles": int(len(test_indices)),
+        "labeled_training_examples": int(len(labeled_examples)),
+        "labeled_training_example_weight": int(labeled_examples["weight"].sum()),
         "features": {
             "max_features": 50000,
             "word_ngram_range": [1, 2],
@@ -170,6 +184,8 @@ def train(
         "Dataset source: dataset/Fake.csv and dataset/True.csv",
         "Split: reproducible 80/20 group-aware stratified holdout; exact content duplicates removed before splitting.",
         f"Dataset report: {json.dumps(dataset_report.to_dict(), sort_keys=True)}",
+        f"Supplemental labeled training examples: {len(labeled_examples)}",
+        f"Supplemental training example weight: {int(labeled_examples['weight'].sum())}",
         f"Selection metric: {metrics['primary_selection_metric']}",
         "Validation comparison: " + json.dumps(comparison, sort_keys=True),
         "Untouched test metrics: " + json.dumps(

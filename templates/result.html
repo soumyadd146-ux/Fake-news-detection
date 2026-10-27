@@ -153,6 +153,66 @@
 
     </div>
 
+    <section class="prediction-guidance
+        {% if result == 'REAL NEWS' %}guidance-real{% else %}guidance-fake{% endif %}"
+        aria-labelledby="prediction-guidance-title">
+        <div class="prediction-guidance-heading">
+            <span class="prediction-guidance-icon">
+                {% if result == 'REAL NEWS' %}
+                    <i class="bi bi-check-circle"></i>
+                {% else %}
+                    <i class="bi bi-exclamation-triangle"></i>
+                {% endif %}
+            </span>
+            <div>
+                <span class="prediction-guidance-label">{{ result }} RESULT</span>
+                <h3 id="prediction-guidance-title">How this news may affect people and society</h3>
+                <p>This guidance is based on the classification of the headline and article you submitted above.</p>
+                <p>
+                    {% if result == 'REAL NEWS' %}
+                        If the information is accurate, it could help people stay informed and support better decisions in their communities. This prediction does not confirm the article's claims.
+                    {% else %}
+                        If the article contains false or misleading claims, it could confuse people and affect personal or community decisions. This prediction is a warning to verify, not proof that the claims are false.
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <div class="prediction-guidance-grid">
+            <div class="prediction-guidance-item">
+                <h4>
+                    {% if result == 'REAL NEWS' %}
+                        Potential benefit to society
+                    {% else %}
+                        Possible effects on society
+                    {% endif %}
+                </h4>
+                <p>
+                    {% if result == 'REAL NEWS' %}
+                        Accurate reporting can help communities understand events, make informed decisions, and respond to issues that affect public well-being.
+                    {% else %}
+                        False or misleading claims may create fear and confusion, lead to poor decisions, weaken trust, and spread quickly when shared.
+                    {% endif %}
+                </p>
+            </div>
+            <div class="prediction-guidance-item">
+                <h4>How to respond responsibly</h4>
+                <p>
+                    {% if result == 'REAL NEWS' %}
+                        Verify important details with trusted news organizations or official sources before acting on or sharing the story. A REAL NEWS label is not a guarantee of accuracy.
+                    {% else %}
+                        Pause before relying on or sharing the article. Check its source and date, and compare its claims with trusted or official sources. A FAKE NEWS label is not independent proof.
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <p class="prediction-guidance-note">
+            <i class="bi bi-info-circle"></i>
+            The classification reflects learned dataset patterns; it does not assess the article's real-world effects or independently fact-check individual claims.
+        </p>
+    </section>
+
     {% if explanation.positive or explanation.negative %}
     <section class="explanation-panel">
         <h3><i class="bi bi-lightbulb"></i> Text features influencing this result</h3>

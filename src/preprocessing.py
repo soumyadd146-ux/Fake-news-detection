@@ -111,3 +111,37 @@ def load_dataset(dataset_dir: str | Path) -> tuple[pd.DataFrame, DatasetReport]:
         class_counts=class_counts,
     )
     return data, report
+
+
+def load_labeled_examples(dataset_dir: str | Path) -> pd.DataFrame:
+    path = Path(dataset_dir) / "labeled_examples.csv"
+    columns = ["title", "text", "content", "label", "weight"]
+    if not path.is_file():
+        return pd.DataFrame(columns=columns)
+
+    examples = pd.read_csv(path)
+    examples.columns = [str(column).strip().lower() for column in examples.columns]
+    required = {"title", "text", "label"}
+    if not required.issubset(examples.columns):
+        raise ValueError(f"{path} must contain 'title', 'text', and 'label' columns")
+
+    examples["title"] = examples["title"].fillna("").astype(str)
+    examples["text"] = examples["text"].fillna("").astype(str)
+    label_mapping = {"fake news": 0, "real news": 1}
+    normalized_labels = examples["label"].astype(str).str.strip().str.casefold()
+    if not normalized_labels.isin(label_mapping).all():
+        raise ValueError(f"{path} labels must be 'FAKE NEWS' or 'REAL NEWS'")
+    examples["label"] = normalized_labels.map(label_mapping).astype(int)
+    if "weight" not in examples.columns:
+        examples["weight"] = 1
+    weights = pd.to_numeric(examples["weight"], errors="raise")
+    if ((weights < 1) | (weights > 20) | (weights % 1 != 0)).any():
+        raise ValueError(f"{path} weights must be whole numbers from 1 to 20")
+    examples["weight"] = weights.astype(int)
+    examples["content"] = [
+        combine_title_and_body(title, body)
+        for title, body in zip(examples["title"], examples["text"])
+    ]
+    if examples["content"].eq("").any():
+        raise ValueError(f"{path} contains an example without usable text")
+    return examples[columns]

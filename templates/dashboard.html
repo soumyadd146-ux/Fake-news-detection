@@ -200,36 +200,6 @@
         </p>
     </div>
 
-    <div class="dash-panel benchmark-panel">
-        <div class="dash-panel-heading">
-            <div>
-                <h3>Model validation benchmark</h3>
-                <p>Cross-validation macro F1 · separate from test results</p>
-            </div>
-            <span class="panel-icon"><i class="bi bi-trophy"></i></span>
-        </div>
-        {% if model_comparison %}
-        <div class="benchmark-list">
-            {% for candidate in model_comparison %}
-            <div class="benchmark-item{% if candidate.selected %} benchmark-selected{% endif %}">
-                <div class="benchmark-label">
-                    <span>{{ candidate.name }}{% if candidate.selected %}<em>Selected</em>{% endif %}</span>
-                    <strong>{{ candidate.score }}%</strong>
-                </div>
-                <div class="performance-track">
-                    <div class="performance-fill" style="width: {{ [candidate.score, 100]|min }}%"></div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <div class="benchmark-empty">
-            <i class="bi bi-bar-chart-line"></i>
-            <p>Validation comparison is not available in the current metrics file.</p>
-            <small>Run <code>python train_model.py</code> to generate validation benchmarks.</small>
-        </div>
-        {% endif %}
-    </div>
 </section>
 
 <!-- Model Metrics -->
@@ -319,6 +289,48 @@
             <small>Held-out test dataset</small>
         </div>
     </div>
+</section>
+
+<!-- Model Validation Benchmark -->
+<section class="dash-panel validation-panel">
+
+    <div class="dash-panel-heading">
+        <div>
+            <h3>Model Validation Benchmark</h3>
+            <p>Cross-validation and execution performance</p>
+        </div>
+
+        <span class="model-badge">5-Fold CV</span>
+    </div>
+
+    <div class="validation-grid">
+
+        <div class="validation-card">
+            <span>Cross-Validation Macro F1</span>
+            <strong>{{ cv_macro_f1 }}%</strong>
+            <small>5-fold validation</small>
+        </div>
+
+        <div class="validation-card">
+            <span>Cross-Validation Std</span>
+            <strong>{{ cv_std }}%</strong>
+            <small>Variation across folds</small>
+        </div>
+
+        <div class="validation-card">
+            <span>Training Time</span>
+            <strong>{{ training_time }} s</strong>
+            <small>Model training</small>
+        </div>
+
+        <div class="validation-card">
+            <span>Prediction Time</span>
+            <strong>{{ prediction_time }} s</strong>
+            <small>Test prediction</small>
+        </div>
+
+    </div>
+
 </section>
 
 <!-- Recent Predictions -->

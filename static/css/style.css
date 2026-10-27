@@ -1197,7 +1197,7 @@ body {
 
 .dashboard-insights {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: 20px;
     margin: 0 0 22px;
 }
@@ -2786,6 +2786,112 @@ body {
 
 }
 
+.prediction-guidance {
+    margin-bottom: 22px;
+    padding: 22px;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--success);
+    border-radius: 15px;
+    background: var(--white);
+    box-shadow: var(--shadow);
+}
+
+.guidance-fake {
+    border-left-color: var(--danger);
+}
+
+.prediction-guidance-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.prediction-guidance-icon {
+    display: inline-grid;
+    flex: 0 0 auto;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--success-light);
+    color: var(--success);
+    font-size: 19px;
+}
+
+.guidance-fake .prediction-guidance-icon {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
+.prediction-guidance-label {
+    color: var(--success);
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: 0.08em;
+}
+
+.guidance-fake .prediction-guidance-label {
+    color: var(--danger);
+}
+
+.prediction-guidance-heading h3 {
+    margin: 4px 0 7px;
+    color: var(--text);
+    font-size: 18px;
+}
+
+.prediction-guidance-heading p,
+.prediction-guidance-item p {
+    color: #626b82;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.prediction-guidance-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.prediction-guidance-item {
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: #fcfdff;
+}
+
+.prediction-guidance-item h4 {
+    margin-bottom: 6px;
+    color: var(--text);
+    font-size: 13px;
+}
+
+.prediction-guidance-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 15px;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.prediction-guidance-note i {
+    margin-top: 2px;
+    color: var(--primary);
+}
+
+@media (max-width: 600px) {
+    .prediction-guidance {
+        padding: 18px;
+    }
+
+    .prediction-guidance-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 .site-footer {
     display: flex;
     justify-content: space-between;
@@ -2977,6 +3083,58 @@ body {
     }
 
     .explanation-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* =========================================
+   MODEL VALIDATION BENCHMARK
+========================================= */
+
+.validation-panel {
+    margin-bottom: 22px;
+}
+
+.validation-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.validation-card {
+    background: #f8f9fc;
+    border: 1px solid #edf0f6;
+    border-radius: 12px;
+    padding: 18px;
+}
+
+.validation-card span {
+    display: block;
+    color: #737b91;
+    font-size: 11px;
+    margin-bottom: 9px;
+}
+
+.validation-card strong {
+    display: block;
+    color: #202846;
+    font-size: 21px;
+    font-weight: 750;
+    margin-bottom: 5px;
+}
+
+.validation-card small {
+    color: #9a9fb0;
+    font-size: 10px;
+}
+
+@media (max-width: 900px) {
+    .validation-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .validation-grid {
         grid-template-columns: 1fr;
     }
 }

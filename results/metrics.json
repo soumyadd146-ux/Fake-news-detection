@@ -1,11 +1,30 @@
 {
-    "algorithm": "Logistic Regression",
-    "accuracy": 99.28,
-    "precision": 99.12,
-    "recall": 99.37,
-    "f1_score": 99.24,
-    "roc_auc": 0.9994,
-    "training_articles": 35911,
+    "accuracy": 98.92,
+    "precision": 98.58,
+    "recall": 99.16,
+    "f1_score": 98.87,
+    "roc_auc": 99.86,
+    "cv_macro_f1": 98.8,
+    "cv_std": 0.1,
+    "training_time": 0.89,
+    "prediction_time": 0.0174,
+    "confusion_matrix": [
+        [
+            4634,
+            61
+        ],
+        [
+            36,
+            4247
+        ]
+    ],
+    "model": "Logistic Regression",
+    "feature_extraction": "TF-IDF",
+    "dataset": "ISOT Fake News Dataset",
+    "cv_folds": 5,
+    "training_articles": 35912,
     "testing_articles": 8978,
-    "total_dataset_articles": 44889
+    "total_dataset_articles": 44890,
+    "labeled_training_examples": 1,
+    "labeled_training_example_weight": 5
 }

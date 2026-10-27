@@ -1,3 +1,4 @@
+import csv
 import json
 import logging
 import os
@@ -26,6 +27,7 @@ app.config.update(
 app.secret_key = app.config["SECRET_KEY"]
 
 DATABASE = str(BASE_DIR / "database" / "history.db")
+DATASET_DIR = BASE_DIR / "dataset"
 METRICS_PATH = BASE_DIR / "results" / "metrics.json"
 METADATA_PATH = BASE_DIR / "models" / "model_metadata.json"
 NEW_MODEL_PATH = BASE_DIR / "models" / "best_model.pkl"
@@ -50,6 +52,60 @@ _model: Any | None = None
 _vectorizer: Any | None = None
 _model_error: str | None = None
 _model_loaded = False
+
+
+def _count_dataset_articles() -> int | None:
+    total = 0
+    try:
+        filenames = ["Fake.csv", "True.csv"]
+        if (DATASET_DIR / "labeled_examples.csv").is_file():
+            filenames.append("labeled_examples.csv")
+        for filename in filenames:
+            with (DATASET_DIR / filename).open(
+                encoding="utf-8-sig",
+                newline="",
+            ) as dataset_file:
+                for row in csv.DictReader(dataset_file):
+                    if (row.get("title") or "").strip() or (row.get("text") or "").strip():
+                        total += 1
+    except (OSError, UnicodeError, csv.Error):
+        logger.exception("Unable to count articles in the training dataset")
+        return None
+    return total
+
+
+def _dataset_counts() -> tuple[int | None, int | None, int | None]:
+    metadata_report = MODEL_METADATA.get("dataset_report", {})
+    if not isinstance(metadata_report, dict):
+        metadata_report = {}
+
+    training_articles = METRICS.get(
+        "training_articles",
+        MODEL_METADATA.get("training_articles"),
+    )
+    testing_articles = METRICS.get(
+        "testing_articles",
+        MODEL_METADATA.get("testing_articles"),
+    )
+    total_articles = METRICS.get(
+        "total_dataset_articles",
+        metadata_report.get("rows_used"),
+    )
+
+    if total_articles is None:
+        total_articles = _count_dataset_articles()
+    if testing_articles is None:
+        confusion_matrix = METRICS.get("confusion_matrix")
+        if isinstance(confusion_matrix, list) and all(
+            isinstance(row, list) for row in confusion_matrix
+        ):
+            testing_articles = sum(sum(row) for row in confusion_matrix)
+    if training_articles is None and total_articles is not None and testing_articles is not None:
+        training_articles = total_articles - testing_articles
+    if total_articles is None and training_articles is not None and testing_articles is not None:
+        total_articles = training_articles + testing_articles
+
+    return training_articles, testing_articles, total_articles
 
 
 @contextmanager
@@ -421,35 +477,56 @@ def dashboard():
         if isinstance(result, dict) and result.get("cv_macro_f1") is not None
     ]
     comparison_entries.sort(key=lambda entry: entry["score"], reverse=True)
-    return render_template(
-        "dashboard.html",
-        total_articles=summary["total_articles"],
-        real_count=summary["real_count"],
-        fake_count=summary["fake_count"],
-        accuracy=round(METRICS.get("accuracy", 0), 2),
-        precision=round(METRICS.get("precision", 0), 2),
-        recall=round(METRICS.get("recall", 0), 2),
-        f1_score=round(METRICS.get("f1_score", 0), 2),
-        roc_auc=round((METRICS.get("roc_auc") or 0) * 100, 2),
-        training_articles=METRICS.get("training_articles", 0),
-        testing_articles=METRICS.get("testing_articles", 0),
-        total_dataset_articles=METRICS.get("total_dataset_articles", 0),
-        average_confidence=round(summary["average_confidence"] or 0, 2),
-        today_count=summary["today_count"],
-        weekly_count=current_week_count,
-        previous_week_count=previous_week_count,
-        weekly_change=weekly_change,
-        real_share=real_share,
-        fake_share=fake_share,
-        high_probability_count=summary["high_probability_count"],
-        moderate_probability_count=summary["moderate_probability_count"],
-        review_suggested_count=summary["review_suggested_count"],
-        model_comparison=comparison_entries,
-        dashboard_date=today.strftime("%A, %B %d, %Y"),
-        recent_predictions=recent_predictions,
-        activity_labels=activity_labels,
-        activity_values=activity_values,
+    training_articles, testing_articles, total_dataset_articles = _dataset_counts()
+    roc_auc_value = METRICS.get("roc_auc") or 0
+    roc_auc = round(
+        roc_auc_value * 100 if roc_auc_value <= 1 else roc_auc_value,
+        2,
     )
+    return render_template(
+    "dashboard.html",
+    total_articles=summary["total_articles"],
+    real_count=summary["real_count"],
+    fake_count=summary["fake_count"],
+
+    accuracy=round(METRICS.get("accuracy", 0), 2),
+    precision=round(METRICS.get("precision", 0), 2),
+    recall=round(METRICS.get("recall", 0), 2),
+    f1_score=round(METRICS.get("f1_score", 0), 2),
+
+    # Model validation benchmark
+    cv_macro_f1=round(METRICS.get("cv_macro_f1", 0), 2),
+    cv_std=round(METRICS.get("cv_std", 0), 2),
+    training_time=round(METRICS.get("training_time", 0), 2),
+    prediction_time=round(METRICS.get("prediction_time", 0), 4),
+
+    roc_auc=roc_auc,
+
+    training_articles=training_articles,
+    testing_articles=testing_articles,
+    total_dataset_articles=total_dataset_articles,
+
+    average_confidence=round(summary["average_confidence"] or 0, 2),
+    today_count=summary["today_count"],
+    weekly_count=current_week_count,
+    previous_week_count=previous_week_count,
+    weekly_change=weekly_change,
+
+    real_share=real_share,
+    fake_share=fake_share,
+
+    high_probability_count=summary["high_probability_count"],
+    moderate_probability_count=summary["moderate_probability_count"],
+    review_suggested_count=summary["review_suggested_count"],
+
+    model_comparison=comparison_entries,
+
+    dashboard_date=today.strftime("%A, %B %d, %Y"),
+
+    recent_predictions=recent_predictions,
+    activity_labels=activity_labels,
+    activity_values=activity_values,
+)
 
 
 @app.route("/about")

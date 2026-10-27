@@ -50,9 +50,43 @@ class FlaskApplicationTests(unittest.TestCase):
         for path in ("/", "/dashboard", "/history", "/about"):
             with self.subTest(path=path):
                 self.assertEqual(self.client.get(path).status_code, 200)
+        self.assertEqual(self.client.get("/impact").status_code, 404)
         health = self.client.get("/health")
         self.assertEqual(health.status_code, 200)
         self.assertEqual(health.get_json()["status"], "ok")
+
+    def test_dashboard_shows_dataset_counts_and_percentage_roc_auc(self):
+        dataset_dir = Path(self.temp_directory.name) / "dataset"
+        dataset_dir.mkdir()
+        (dataset_dir / "Fake.csv").write_text(
+            "title,text\nFake headline,Fake article\n,Another fake article\n",
+            encoding="utf-8",
+        )
+        (dataset_dir / "True.csv").write_text(
+            "title,text\nReal headline,Real article\nReal update,Another real article\n",
+            encoding="utf-8",
+        )
+        previous_dataset_dir = webapp.DATASET_DIR
+        previous_metrics = webapp.METRICS
+        previous_metadata = webapp.MODEL_METADATA
+        webapp.DATASET_DIR = dataset_dir
+        webapp.METRICS = {
+            "roc_auc": 99.92,
+            "confusion_matrix": [[1, 0], [0, 1]],
+        }
+        webapp.MODEL_METADATA = {}
+        try:
+            response = self.client.get("/dashboard")
+        finally:
+            webapp.DATASET_DIR = previous_dataset_dir
+            webapp.METRICS = previous_metrics
+            webapp.MODEL_METADATA = previous_metadata
+
+        page = response.get_data(as_text=True)
+        self.assertRegex(page, r"Training articles</span>\s*<strong>2</strong>")
+        self.assertRegex(page, r"Test articles</span>\s*<strong>2</strong>")
+        self.assertRegex(page, r"Total dataset</span>\s*<strong>4</strong>")
+        self.assertRegex(page, r"ROC AUC</span>\s*<strong>99\.92%</strong>")
 
     def test_browser_prediction_requires_csrf_and_is_stored(self):
         self.client.get("/")
@@ -67,12 +101,36 @@ class FlaskApplicationTests(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"Predicted-class probability", response.data)
+        self.assertIn(b"How this news may affect people and society", response.data)
+        self.assertIn(b"REAL NEWS RESULT", response.data)
+        self.assertIn(b"Potential benefit to society", response.data)
+        self.assertIn(b"Accurate reporting can help communities", response.data)
         connection = sqlite3.connect(webapp.DATABASE)
         try:
             count = connection.execute("SELECT COUNT(*) FROM predictions").fetchone()[0]
         finally:
             connection.close()
         self.assertEqual(count, 1)
+
+    def test_fake_prediction_shows_fake_specific_guidance(self):
+        self.client.get("/")
+        with self.client.session_transaction() as browser_session:
+            token = browser_session["_csrf_token"]
+
+        response = self.client.post(
+            "/predict",
+            data={
+                "csrf_token": token,
+                "title": "Secret cure exposed",
+                "news": "hidden conspiracy rumor miracle cure",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"FAKE NEWS RESULT", response.data)
+        self.assertIn(b"Possible effects on society", response.data)
+        self.assertIn(b"False or misleading claims may create fear and confusion", response.data)
+        self.assertIn(b"Pause before relying on or sharing the article.", response.data)
 
     def test_json_prediction_validation_and_history_search(self):
         invalid = self.client.post("/api/predict", json={"title": "", "text": ""})
